@@ -161,3 +161,64 @@ REFRESH = 10   # Seconds between dashboard redraws
 # LOGGING
 # ═══════════════════════════════════════════════════════════════════════════
 TRADE_LOG_FILE = os.getenv("TRADE_LOG_FILE", "trades.csv")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CONFIGURATION VALIDATION
+# ═══════════════════════════════════════════════════════════════════════════
+
+def validate_config(require_credentials: bool = True) -> tuple[bool, list[str]]:
+    """
+    Validate configuration settings.
+    
+    Args:
+        require_credentials: If True, validates that API credentials are set
+    
+    Returns:
+        (is_valid, list_of_errors)
+    """
+    errors = []
+    
+    # Check credentials if required (skip for dry-run/paper modes)
+    if require_credentials:
+        if not POLYMARKET_PRIVATE_KEY or POLYMARKET_PRIVATE_KEY == "your_private_key_here":
+            errors.append("POLYMARKET_PRIVATE_KEY is not set in .env file")
+        
+        if not POLYMARKET_FUNDER or POLYMARKET_FUNDER == "your_funder_address_here":
+            errors.append("POLYMARKET_FUNDER is not set in .env file")
+        
+        if POLYMARKET_PRIVATE_KEY and not POLYMARKET_PRIVATE_KEY.startswith("0x"):
+            errors.append("POLYMARKET_PRIVATE_KEY should start with '0x'")
+        
+        if POLYMARKET_FUNDER and not POLYMARKET_FUNDER.startswith("0x"):
+            errors.append("POLYMARKET_FUNDER should start with '0x'")
+    
+    # Validate numeric ranges
+    if not (0 <= STOP_LOSS_PCT <= 100):
+        errors.append(f"STOP_LOSS_PCT ({STOP_LOSS_PCT}) must be between 0 and 100")
+    
+    if not (0 <= PROFIT_TARGET_PCT <= 1000):
+        errors.append(f"PROFIT_TARGET_PCT ({PROFIT_TARGET_PCT}) must be between 0 and 1000")
+    
+    if MAX_DAILY_LOSS_USD < 0:
+        errors.append(f"MAX_DAILY_LOSS_USD ({MAX_DAILY_LOSS_USD}) cannot be negative")
+    
+    if POSITION_SIZE_USD <= 0:
+        errors.append(f"POSITION_SIZE_USD ({POSITION_SIZE_USD}) must be positive")
+    
+    if MAX_POSITIONS <= 0:
+        errors.append(f"MAX_POSITIONS ({MAX_POSITIONS}) must be positive")
+    
+    return (len(errors) == 0, errors)
+
+
+def print_config_errors(errors: list[str]):
+    """Print configuration errors in a user-friendly format."""
+    print("\n" + "="*70)
+    print("⚠️  CONFIGURATION ERRORS")
+    print("="*70)
+    for i, error in enumerate(errors, 1):
+        print(f"  {i}. {error}")
+    print("\nPlease fix these errors in your .env file and try again.")
+    print("See .env.example for reference.")
+    print("="*70 + "\n")

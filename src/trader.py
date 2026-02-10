@@ -3,8 +3,10 @@ Trading execution module for Polymarket Trading Bot.
 Handles order creation, execution, position management, and profit booking via Polymarket CLOB API.
 """
 import time
+import asyncio
 from typing import Optional
 from dataclasses import dataclass
+from functools import wraps
 
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import (
@@ -19,6 +21,27 @@ from py_clob_client.order_builder.constants import BUY, SELL
 from . import config
 from .risk import Position, RiskManager
 from .database import get_database, TradeDatabase
+
+
+# Retry decorator for API calls
+def retry_on_failure(max_retries: int = 3, backoff_factor: float = 1.5):
+    """Decorator to retry failed API calls with exponential backoff."""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            for attempt in range(max_retries):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        raise
+                    wait_time = backoff_factor ** attempt
+                    print(f"  [Trader] API call failed (attempt {attempt + 1}/{max_retries}): {e}")
+                    print(f"  [Trader] Retrying in {wait_time:.1f}s...")
+                    time.sleep(wait_time)
+            return None
+        return wrapper
+    return decorator
 
 
 @dataclass

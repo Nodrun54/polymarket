@@ -1,7 +1,40 @@
+# Environment and Credentials (CRITICAL - Never commit these!)
 .env
+.env.local
+.env.*.local
+*.key
+*.pem
+*_key.txt
+credentials.json
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+.Python
+
+# Virtual Environments
 .venv/
 venv/
+ENV/
+env/
+
+# Logs and Databases (May contain sensitive trade data)
 *.log
+*.db
+*.sqlite
+*.sqlite3
+polymarket_trades.db
+trades.csv
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db

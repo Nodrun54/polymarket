@@ -307,6 +307,13 @@ async def main():
     console.print("[bold magenta]       POLYMARKET AUTO TRADING BOT v2.0                 [/bold magenta]")
     console.print("[bold magenta]═══════════════════════════════════════════════════════[/bold magenta]\n")
     
+    # Validate configuration early
+    require_live_creds = not (args.dry_run or args.paper)
+    is_valid, validation_errors = config.validate_config(require_credentials=require_live_creds)
+    if not is_valid:
+        config.print_config_errors(validation_errors)
+        return
+    
     if args.dry_run:
         console.print("[yellow]🔒 DRY RUN MODE - No orders will be placed[/yellow]\n")
     elif args.paper:

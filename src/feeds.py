@@ -131,7 +131,12 @@ async def binance_feed(symbol: str, kline_iv: str, state: State):
         except Exception as e:
             print(f"  [Binance WS] disconnected: {e}, reconnecting...")
             state.binance_connected = False
-            await asyncio.sleep(5)
+            # Exponential backoff: start with 2s, max 30s
+            await asyncio.sleep(min(2 ** min(5, getattr(binance_feed, '_retry_count', 0)), 30))
+            binance_feed._retry_count = getattr(binance_feed, '_retry_count', 0) + 1
+            # Reset counter on successful connection
+            if state.binance_connected:
+                binance_feed._retry_count = 0
 
 
 async def bootstrap(symbol: str, interval: str, state: State):
@@ -313,7 +318,12 @@ async def pm_feed(state: State):
         except Exception as e:
             print(f"  [PM] disconnected: {e}, reconnecting...")
             state.pm_connected = False
-            await asyncio.sleep(5)
+            # Exponential backoff: start with 2s, max 30s
+            await asyncio.sleep(min(2 ** min(5, getattr(pm_feed, '_retry_count', 0)), 30))
+            pm_feed._retry_count = getattr(pm_feed, '_retry_count', 0) + 1
+            # Reset counter on successful connection
+            if state.pm_connected:
+                pm_feed._retry_count = 0
 
 
 def _pm_apply(asset: str, asks: list, state: State):
