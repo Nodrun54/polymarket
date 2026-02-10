@@ -39,7 +39,7 @@ A high-performance, automated trading system for [Polymarket](https://polymarket
 
 1. **Clone the Repository**:
    ```bash
-   git clone [https://github.com/Nodrun54/polymarket.git]
+   git clone https://github.com/Nodrun54/polymarket.git
    cd polymarket-bot
    ```
 
