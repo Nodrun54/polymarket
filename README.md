@@ -118,8 +118,209 @@ python main.py --coin BTC --tf 15m --paper
 
 ---
 
+## 📤 Publishing to GitHub - Complete Guide
+
+This section provides step-by-step instructions for safely publishing your bot to GitHub **without exposing your credentials**.
+
+### ✅ Pre-Publication Checklist
+
+Before pushing to GitHub, verify the following:
+
+1. **Credentials are NOT in your code**:
+   ```bash
+   # Search for potential API keys or private keys in code
+   git grep -i "POLYMARKET_API_KEY"
+   git grep -i "0x[a-fA-F0-9]\{64\}"
+   ```
+   
+2. **`.env` file is ignored**:
+   ```bash
+   git status
+   ```
+   Result should NOT show `.env` file
+   
+3. **`.env.example` exists with placeholders only**:
+   ```bash
+   cat .env.example | grep "your_"
+   ```
+   Should see placeholder values like `your_api_key_here`
+   
+4. **`.gitignore` is properly configured**:
+   ```bash
+   cat .gitignore | grep ".env"
+   ```
+   Should show `.env` in the list
+
+5. **Database file is excluded** (contains your trade history):
+   ```bash
+   git status | grep ".db"
+   ```
+   Should NOT appear (handled by `.gitignore`)
+
+### 📋 Step-by-Step Git Workflow
+
+#### First Time Setup (New Repository)
+
+1. **Initialize Git** (if not already done):
+   ```bash
+   cd c:/Users/debar/Desktop/polymarket
+   git init
+   ```
+
+2. **Verify sensitive files are excluded**:
+   ```bash
+   git status
+   ```
+   Ensure `.env` and `polymarket_trades.db` are NOT listed
+
+3. **Add safe files to staging**:
+   ```bash
+   git add .gitignore
+   git add .env.example
+   git add README.md
+   git add requirements.txt
+   git add main.py
+   git add src/
+   ```
+
+4. **Review what will be committed**:
+   ```bash
+   git status
+   git diff --cached
+   ```
+   **CRITICAL**: If you see any API keys, private keys, or wallet addresses **STOP** and remove them!
+
+5. **Commit changes**:
+   ```bash
+   git commit -m "Initial commit: Polymarket trading bot with indicators and risk management"
+   ```
+
+6. **Create GitHub repository**:
+   - Go to [github.com](https://github.com)
+   - Click "New repository"
+   - Name it (e.g., `polymarket-trading-bot`)
+   - **DO NOT** initialize with README (you already have one)
+   - Click "Create repository"
+
+7. **Link local repository to GitHub**:
+   ```bash
+   git remote add origin https://github.com/YOUR_USERNAME/polymarket-trading-bot.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+#### Updating Existing Repository
+
+1. **Check current status**:
+   ```bash
+   git status
+   ```
+
+2. **Add only safe files**:
+   ```bash
+   git add .
+   # OR be specific:
+   git add README.md
+   git add src/config.py
+   ```
+
+3. **Verify what will be committed**:
+   ```bash
+   git diff --cached
+   ```
+
+4. **Commit and push**:
+   ```bash
+   git commit -m "docs: Update README with setup instructions"
+   git push
+   ```
+
+### 🔐 Security Verification Commands
+
+Run these commands before EVERY push to GitHub:
+
+```bash
+# 1. Check no .env file is tracked
+git ls-files | grep ".env"
+# Expected: No output (or only .env.example)
+
+# 2. Check for hardcoded credentials
+git grep -E "(POLYMARKET_API_KEY|POLYMARKET_SECRET|POLYMARKET_PRIVATE_KEY)" -- ':!.env.example'
+# Expected: Only configuration file references, no actual values
+
+# 3. Verify .gitignore is working
+git check-ignore .env
+# Expected: .env
+
+# 4. Check what's about to be pushed
+git log origin/main..HEAD
+git diff origin/main..HEAD
+# Review carefully for any secrets
+```
+
+### 🚨 Emergency: Accidentally Committed Secrets
+
+If you accidentally committed credentials:
+
+1. **DO NOT just delete them and commit again** - they're still in git history!
+
+2. **Remove from history** (if not yet pushed):
+   ```bash
+   # Undo last commit but keep changes
+   git reset HEAD~1
+   
+   # Remove .env from staging if accidentally added
+   git reset .env
+   
+   # Commit again without secrets
+   git add .
+   git commit -m "Your message"
+   ```
+
+3. **If already pushed to GitHub**:
+   - **Immediately rotate ALL credentials** (generate new API keys, new wallet)
+   - Contact GitHub support to purge sensitive data
+   - Consider making repository private temporarily
+
+4. **For complete history cleanup** (ADVANCED):
+   ```bash
+   # Remove file from all commits
+   git filter-branch --force --index-filter \
+   "git rm --cached --ignore-unmatch .env" \
+   --prune-empty --tag-name-filter cat -- --all
+   
+   # Force push (WARNING: Rewrites history)
+   git push origin --force --all
+   ```
+
+### 💡Tips for Safe GitHub Usage
+
+1. **Use `.env.example` as your guide**:
+   - Always keep it updated with new variables
+   - Never put real values in it
+   
+2. **Double-check before pushing**:
+   ```bash
+   git diff HEAD
+   ```
+
+3. **Enable GitHub Secret Scanning** (recommended):
+   - Go to repository Settings → Security → Secret scanning
+   - GitHub will alert you if credentials are detected
+
+4. **Consider making repository private**:
+   - Especially during development
+   - Can make public later after thorough review
+
+5. **Review public commits regularly**:
+   - Check `https://github.com/YOUR_USERNAME/YOUR_REPO/commits`
+   - Look for any accidental exposure
+
+---
+
 ## ⚠️ Disclaimer
 
 **Financial Risk**: Trading crypto and prediction markets involves significant risk. This bot is provided for educational purposes. Never trade funds you cannot afford to lose. The developers are not responsible for any financial losses incurred.
 
 ---
+
