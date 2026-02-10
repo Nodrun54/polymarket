@@ -204,7 +204,7 @@ Before pushing to GitHub, verify the following:
 
 7. **Link local repository to GitHub**:
    ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/polymarket-trading-bot.git
+   git remote add origin https://github.com/Nodrun54/polymarket.git
    git branch -M main
    git push -u origin main
    ```
@@ -313,7 +313,7 @@ If you accidentally committed credentials:
    - Can make public later after thorough review
 
 5. **Review public commits regularly**:
-   - Check `https://github.com/YOUR_USERNAME/YOUR_REPO/commits`
+   - Check `https://github.com/Nodrun54/polymarket.git`
    - Look for any accidental exposure
 
 ---
